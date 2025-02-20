@@ -1,6 +1,6 @@
 # Discord IDE - Advanced for Discord Developers
 
-A comprehensive Integrated Development Environment (IDE) tailored for Discord bot developers with bilingual support (English/Arabic)
+A comprehensive Integrated Development Environment (IDE) tailored for Discord bot developers
 
 ![Screenshot](screenshot.png)
 
@@ -14,9 +14,6 @@ A comprehensive Integrated Development Environment (IDE) tailored for Discord bo
 - **Multi-Language Support**:
   - JavaScript/Node.js (Built-in)
   - Python (Requires Installation)
-- **Bilingual UI**:
-  - English (Default)
-  - Full Arabic Support
 - **Discord Integration**:
   - Rich Presence Status
   - Direct Code Sharing
