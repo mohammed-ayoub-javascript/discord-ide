@@ -49,6 +49,7 @@
 ```bash
 git clone https://github.com/yourusername/discord-ide.git
 cd discord-ide
+```
 
 # Discord IDE - Advanced for Discord Developers
 
