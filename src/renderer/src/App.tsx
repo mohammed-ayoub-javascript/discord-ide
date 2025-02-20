@@ -1,6 +1,6 @@
 import { useState } from "react"
 import Projects from "./pages/projects/page";
-
+import { ThemeProvider } from "@/components/theme/theme-provider"
 function App(){
   const [page , setPage] = useState("projects");
   
@@ -20,7 +20,10 @@ function App(){
   }
   return (
     <>
-    {content}
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+     {content}     
+    </ThemeProvider>
+
     </>
   )
 }
