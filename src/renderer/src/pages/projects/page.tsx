@@ -92,7 +92,7 @@ const Projects = () => {
     }
 
     window.electron.ipcRenderer.on('install-progress', progressHandler)
-    window.electron.ipcRenderer.on('install-complete', completeHandler)
+    window.electron.ipcRenderer.on('install-complete', completeHandler as any)
 
     return () => {
       window.electron.ipcRenderer.removeAllListeners('install-progress')
