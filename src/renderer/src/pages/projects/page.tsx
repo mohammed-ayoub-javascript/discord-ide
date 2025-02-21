@@ -15,25 +15,51 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 
+type FormErrors = {
+  projectName?: string
+  [key: `library-${number}`]: string
+}
+
 const Projects = () => {
   const { language } = useLanguage()
   const t = useTranslator()
-
-  useEffect(() => {
-    console.log(language)
-  }, [])
-
+  
+  const [projectName, setProjectName] = useState('')
+  const [description, setDescription] = useState('')
+  const [token, setToken] = useState('')
   const [libraries, setLibraries] = useState<string[]>([''])
   const [searchTerm, setSearchTerm] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
   const [newLibraryName, setNewLibraryName] = useState('')
+  const [installProgress, setInstallProgress] = useState<string[]>([])
+  const [isInstalling, setIsInstalling] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [installComplete, setInstallComplete] = useState(false)
+
+  const validateField = (name: string, value: string): string => {
+    if (!value.trim()) return t('validation.required') as any
+    if (name === 'projectName' && !/^[a-z0-9-_]+$/.test(value)) return t('validation.invalidName') as any
+    return ''
+  }
+
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+    newErrors.projectName = validateField('projectName', projectName)
+    libraries.forEach((lib, index) => {
+      const error = validateField(`library-${index}`, lib)
+      if (error) newErrors[`library-${index}`] = error
+    })
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const addLibraryField = () => {
-    if (newLibraryName.trim() !== '') {
+    if (newLibraryName.trim()) {
       setLibraries([...libraries, newLibraryName.trim()])
       setNewLibraryName('')
     } else {
       setLibraries([...libraries, ''])
+      setErrors(prev => ({ ...prev, [`library-${libraries.length}`]: t('validation.required') as any }))
     }
   }
 
@@ -41,63 +67,110 @@ const Projects = () => {
     const newLibraries = [...libraries]
     newLibraries[index] = value
     setLibraries(newLibraries)
-  }
-
-  const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + libraries.length) % libraries.length)
-  }
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % libraries.length)
+    if (value.trim() && errors[`library-${index}`]) {
+      const newErrors = { ...errors }
+      delete newErrors[`library-${index}`]
+      setErrors(newErrors)
+    }
   }
 
   useEffect(() => {
-    if (libraries.length >= 15 && searchTerm.trim() !== '') {
-      const index = libraries.findIndex((lib) =>
-        lib.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      if (index !== -1) {
-        setCurrentIndex(index)
-      }
+    if (libraries.length >= 15 && searchTerm.trim()) {
+      const index = libraries.findIndex(lib => lib.toLowerCase().includes(searchTerm.toLowerCase()))
+      if (index !== -1) setCurrentIndex(index)
     }
   }, [searchTerm, libraries])
+
+  useEffect(() => {
+    const progressHandler = (_event: any, data: string) => {
+      setInstallProgress(prev => [...prev, data])
+    }
+
+    const completeHandler = (success: boolean) => {
+      setInstallComplete(success)
+      setIsInstalling(false)
+    }
+
+    window.electron.ipcRenderer.on('install-progress', progressHandler)
+    window.electron.ipcRenderer.on('install-complete', completeHandler)
+
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('install-progress')
+      window.electron.ipcRenderer.removeAllListeners('install-complete')
+    }
+  }, [])
+
+  const handleCreateProject = async () => {
+    if (!validateForm()) {
+      console.log('error');
+      
+    }
+    
+    const result = await window.electron.ipcRenderer.invoke('open-directory-dialog')
+    
+    if (!result.canceled && result.filePaths[0]) {
+      const projectPath = result.filePaths[0]
+      setIsInstalling(true)
+      setInstallComplete(false)
+      
+      window.electron.ipcRenderer.send('create-project', {
+        projectData: {
+          name: projectName,
+          description,
+          token,
+          libraries: libraries.filter(l => l.trim())
+        },
+        path: projectPath
+      })
+      
+      window.electron.ipcRenderer.send('install-dependencies', projectPath)
+    }
+  }
+
+  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + libraries.length) % libraries.length)
+  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % libraries.length)
 
   return (
     <div className="w-full h-full">
       <div className="w-full flex justify-between items-center flex-row border-b border-gray-200 p-3">
         <div className="text-2xl font-extrabold cursor-pointer">{t('home.title') as any}</div>
-        <div className="flex justify-center items-center flex-row gap-2">
+        <div className="flex items-center gap-2">
           <Dialog>
-            <DialogTrigger>
-              <Button>
-                <Plus />
-              </Button>
-            </DialogTrigger>
+            <DialogTrigger><Button><Plus /></Button></DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t('home.dialog.title') as any}</DialogTitle>
-                <DialogDescription>
-                  {t('home.dialog.form.projectname') as any}
-                  <Input
-                    className="w-full mt-2 mb-2"
-                    placeholder={t('home.dialog.form.projectname') as any}
-                  />
+                <DialogDescription className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">{t('home.dialog.form.projectname') as any}</label>
+                    <Input
+                      value={projectName}
+                      onChange={(e) => setProjectName(e.target.value)}
+                      className={errors.projectName ? 'border-red-500' : ''}
+                      placeholder="my-project"
+                    />
+                    {errors.projectName && <p className="text-red-500 text-xs mt-1">{errors.projectName}</p>}
+                  </div>
 
-                  {t('home.dialog.form.description') as any}
-                  <Input
-                    className="w-full mt-2 mb-2"
-                    placeholder={t('home.dialog.form.description') as any}
-                  />
+                  <div>
+                    <label className="block text-sm font-medium mb-1">{t('home.dialog.form.description') as any}</label>
+                    <Input
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </div>
 
-                  {t('home.dialog.form.token') as any}
-                  <Input
-                    className="w-full mt-2 mb-2"
-                    placeholder={t('home.dialog.form.token') as any}
-                  />
+                  <div>
+                    <label className="block text-sm font-medium mb-1">{t('home.dialog.form.token') as any}</label>
+                    <Input
+                      value={token}
+                      onChange={(e) => setToken(e.target.value)}
+                    />
+                  </div>
+
                   {libraries.length >= 15 ? (
-                    <div className="flex flex-col gap-2">
+                    <div className="space-y-4">
                       <Input
-                        className="w-full mt-2 mb-2"
                         placeholder="بحث"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -105,67 +178,77 @@ const Projects = () => {
                       <div className="flex items-center gap-2">
                         <Button onClick={handlePrev}>{'<'}</Button>
                         <Input
-                          className="w-full mt-2 mb-2"
-                          placeholder={t('home.dialog.form.library') as any}
-                          value={libraries[currentIndex] ?? ''}
-                          onChange={(e) => {
-                            const newLibraries = [...libraries]
-                            newLibraries[currentIndex] = e.target.value
-                            setLibraries(newLibraries)
-                          }}
+                          value={libraries[currentIndex] || ''}
+                          onChange={(e) => handleLibraryChange(currentIndex, e.target.value)}
+                          className={errors[`library-${currentIndex}`] ? 'border-red-500' : ''}
                         />
                         <Button onClick={handleNext}>{'>'}</Button>
                       </div>
+                      {errors[`library-${currentIndex}`] && <p className="text-red-500 text-xs mt-1">{errors[`library-${currentIndex}`]}</p>}
                       <Input
-                        className="w-full mt-2 mb-2"
-                        placeholder={(t('home.dialog.form.libraryName') as any) || 'اسم المكتبة'}
+                        placeholder={t('home.dialog.form.libraryName') as any}
                         value={newLibraryName}
                         onChange={(e) => setNewLibraryName(e.target.value)}
                       />
                       <Button
-                        type="button"
                         onClick={addLibraryField}
                         variant="outline"
-                        className="w-full mt-2"
+                        className="w-full"
                       >
-                        <Plus className="h-4 w-4" />{' '}
-                        {(t('home.dialog.form.addLibrary') as any) || 'إضافة مكتبة'}
+                        <Plus className="h-4 w-4 mr-2" />
+                        {t('home.dialog.form.addLibrary') as any}
                       </Button>
                     </div>
                   ) : (
-                    <div
-                      className={
-                        libraries.length >= 12
-                          ? 'grid grid-cols-4 gap-2'
-                          : libraries.length >= 8
-                            ? 'grid grid-cols-3 gap-2'
-                            : 'space-y-2'
-                      }
-                    >
+                    <div className="space-y-4">
                       {libraries.map((library, index) => (
                         <div key={index} className="flex items-center gap-2">
                           <Input
-                            className="w-full mt-2 mb-2"
-                            placeholder={t('home.dialog.form.library') as any}
                             value={library}
                             onChange={(e) => handleLibraryChange(index, e.target.value)}
+                            className={errors[`library-${index}`] ? 'border-red-500' : ''}
+                            placeholder={`Library ${index + 1}`}
                           />
                           {index === libraries.length - 1 && (
                             <Button
-                              type="button"
                               onClick={addLibraryField}
                               variant="outline"
                               size="icon"
-                              className="ml-2"
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
                       ))}
+                      {Object.keys(errors).map((key) => key.startsWith('library-') && (
+                        <p key={key} className="text-red-500 text-xs mt-1 ml-2">
+                          {errors[key]}
+                        </p>
+                      ))}
                     </div>
                   )}
-                  <Button className="w-full">{t('home.dialog.form.button') as any}</Button>
+
+                  <Button 
+                    onClick={handleCreateProject}
+                    className="w-full mt-4"
+                    disabled={isInstalling}
+                  >
+                    {isInstalling ? t('home.dialog.form.installing') as any : t('home.dialog.form.button') as any}
+                  </Button>
+
+                  {installComplete && (
+                    <div className="text-green-500 font-bold text-center mt-4">true</div>
+                  )}
+
+                  {isInstalling && (
+                    <div className="mt-4 p-4 bg-gray-100 rounded-md max-h-40 overflow-y-auto">
+                      <pre className="text-sm">
+                        {installProgress.map((line, index) => (
+                          <div key={index}>{line}</div>
+                        ))}
+                      </pre>
+                    </div>
+                  )}
                 </DialogDescription>
               </DialogHeader>
             </DialogContent>

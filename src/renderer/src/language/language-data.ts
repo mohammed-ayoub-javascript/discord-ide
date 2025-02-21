@@ -11,10 +11,15 @@ export const dataLanguage = {
           description: 'وصف المشروع',
           library: 'المكاتب الاضافية',
           token: 'التوكن',
+          installing: 'جاري تثبيت التبعيات...',
           button: 'اضافة'
         }
       }
-    }
+    },
+    validation: {
+      required: 'هذا الحقل مطلوب',
+      invalidName: 'يجب أن يكون الاسم باللغة الإنجليزية بدون مسافات',
+    },
   },
   en: {
     dir: 'ltr',
@@ -25,12 +30,17 @@ export const dataLanguage = {
         title: 'New Project',
         form: {
           projectname: 'Project Name',
+          installing: 'Installing dependencies...',
           description: 'Project Description',
           library: 'Additional Libraries',
           token: 'Token',
           button: 'Add'
         }
       }
-    }
+    },
+    validation: {
+      required: 'This field is required',
+      invalidName: 'Name must be lowercase with hyphens only',
+    },
   }
 }
