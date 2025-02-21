@@ -1,6 +1,6 @@
 import { ModeToggle } from '@/components/theme/mode-toggle'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Code, Plus } from 'lucide-react'
 import { useLanguage } from '@/context/languageContext'
 import { useEffect, useState } from 'react'
 import { useTranslator } from '@/language/translator'
@@ -14,6 +14,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { usePage } from '@/context/pageContext'
 
 type FormErrors = {
   projectName?: string
@@ -21,9 +22,6 @@ type FormErrors = {
 }
 
 const Projects = () => {
-  const { language } = useLanguage()
-  const t = useTranslator()
-  
   const [projectName, setProjectName] = useState('')
   const [description, setDescription] = useState('')
   const [token, setToken] = useState('')
@@ -35,7 +33,8 @@ const Projects = () => {
   const [isInstalling, setIsInstalling] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [installComplete, setInstallComplete] = useState(false)
-
+  const {changePage} = usePage();
+  const t = useTranslator()
   const validateField = (name: string, value: string): string => {
     if (!value.trim()) return t('validation.required') as any
     if (name === 'projectName' && !/^[a-z0-9-_]+$/.test(value)) return t('validation.invalidName') as any
@@ -237,7 +236,11 @@ const Projects = () => {
                   </Button>
 
                   {installComplete && (
-                    <div className="text-green-500 font-bold text-center mt-4">true</div>
+                      <Button className=' w-full' onClick={() => {
+                        changePage("dev-page");
+                      }}>
+                        <Code />
+                      </Button>
                   )}
 
                   {isInstalling && (
