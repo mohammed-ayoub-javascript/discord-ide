@@ -1,4 +1,3 @@
-// في ملف src/preload/index.ts
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electron', {

@@ -1,32 +1,31 @@
-import { useState } from 'react'
 import Projects from './pages/projects/page'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { LanguageProvider } from './context/languageContext'
-function App() {
-  const [page, setPage] = useState('projects')
+import { PageProvider, usePage } from './context/pageContext'
 
-  const changePage = (page: string) => {
-    setPage(page)
-  }
+function AppContent() {
+  const { page } = usePage()
 
-  let content
-
-  switch (page) {
-    case 'projects':
-      content = (
-        <div className=" h-screen w-full">
-          <Projects />
-        </div>
-      )
-  }
   return (
     <>
+      {page === 'projects' && (
+        <div className="h-screen w-full">
+          <Projects />
+        </div>
+      )}
+    </>
+  )
+}
+
+function App() {
+  return (
+    <PageProvider>
       <LanguageProvider>
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          {content}
+          <AppContent />
         </ThemeProvider>
       </LanguageProvider>
-    </>
+    </PageProvider>
   )
 }
 
