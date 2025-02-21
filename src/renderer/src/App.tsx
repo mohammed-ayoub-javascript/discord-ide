@@ -1,31 +1,31 @@
-import { useState } from "react"
-import Projects from "./pages/projects/page";
-import { ThemeProvider } from "@/components/theme/theme-provider";
-import { LanguageProvider } from "./context/languageContext";
-function App(){
-  const [page , setPage] = useState("projects");
-  
-  const changePage = (page : string) =>{
-    setPage(page);
-  } 
+import { useState } from 'react'
+import Projects from './pages/projects/page'
+import { ThemeProvider } from '@/components/theme/theme-provider'
+import { LanguageProvider } from './context/languageContext'
+function App() {
+  const [page, setPage] = useState('projects')
 
-  let content ;
+  const changePage = (page: string) => {
+    setPage(page)
+  }
 
-  switch(page){
-    case 'projects' : 
-    content = (
-      <div className=" h-screen w-full">
-        <Projects />
-      </div>
-    )
+  let content
+
+  switch (page) {
+    case 'projects':
+      content = (
+        <div className=" h-screen w-full">
+          <Projects />
+        </div>
+      )
   }
   return (
     <>
-    <LanguageProvider>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {content}     
-      </ThemeProvider>
-    </LanguageProvider>
+      <LanguageProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          {content}
+        </ThemeProvider>
+      </LanguageProvider>
     </>
   )
 }

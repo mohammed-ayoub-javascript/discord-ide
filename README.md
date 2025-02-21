@@ -28,6 +28,7 @@
   - محاكاة نظام الملفات المحلي
 
 ## الميزات القادمة 🚧
+
 - [ ] دعم Git مدمج
 - [ ] وحدة تصحيح الأخطاء (Debugger)
 - [ ] دعم الإضافات (Plugins)
@@ -40,12 +41,15 @@
 ## التثبيت 💻
 
 ### المتطلبات الأساسية:
+
 - Node.js v18+
 - Python 3.10+ (اختياري)
 - npm
 
 ### خطوات التثبيت:
+
 1. استنساخ المستودع:
+
 ```bash
 git clone https://github.com/yourusername/discord-ide.git
 cd discord-ide
@@ -79,6 +83,7 @@ A comprehensive Integrated Development Environment (IDE) tailored for Discord bo
   - Local Filesystem Simulation
 
 ## Upcoming Features 🚧
+
 - [ ] Built-in Git Support
 - [ ] Debugging Tools
 - [ ] Plugin System
@@ -91,12 +96,16 @@ A comprehensive Integrated Development Environment (IDE) tailored for Discord bo
 ## Installation 💻
 
 ### Prerequisites:
+
 - Node.js v18+
 - Python 3.10+ (Optional)
 - npm
 
 ### Installation Steps:
+
 1. Clone Repository:
+
 ```bash
 git clone https://github.com/yourusername/discord-ide.git
 cd discord-ide
+```
