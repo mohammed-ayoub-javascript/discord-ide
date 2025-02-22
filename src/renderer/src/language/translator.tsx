@@ -1,4 +1,4 @@
-import { useLanguage } from '@/context/languageContext'
+import { useLanguage } from '@/context/language-context'
 import { dataLanguage } from './language-data'
 
 export const useTranslator = () => {

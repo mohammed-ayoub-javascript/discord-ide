@@ -13,7 +13,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { usePage } from '@/context/pageContext'
+import { usePage } from '@/context/page-context'
 import axios from "axios";
 import Loading from '@/loading/loading'
 import { API } from '@/lib/api'
@@ -148,6 +148,10 @@ const Projects = () => {
       console.log(err);
     });
   }  , [])
+
+  const goToProject = () => {
+    changePage("dev-page")
+  }
 
   return (
     <div className="w-full h-full">
@@ -301,7 +305,9 @@ const Projects = () => {
           )}
           <ScrollArea className=' h-screen w-full'>
           {projects.map((item) => (
-            <div className=' w-full mt-3 cursor-pointer'>
+            <div className=' w-full mt-3 cursor-pointer' onClick={() => {
+              goToProject();
+            }}>
               <Card>
                 <CardHeader>
                   <CardTitle className=' text-2xl font-extrabold'>

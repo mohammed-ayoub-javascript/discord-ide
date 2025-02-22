@@ -1,7 +1,7 @@
 import Projects from './pages/projects/page'
 import { ThemeProvider } from '@/components/theme/theme-provider'
-import { LanguageProvider } from './context/languageContext'
-import { PageProvider, usePage } from './context/pageContext'
+import { LanguageProvider } from './context/language-context'
+import { PageProvider, usePage } from './context/page-context'
 
 function AppContent() {
   const { page } = usePage()
@@ -11,6 +11,12 @@ function AppContent() {
       {page === 'projects' && (
         <div className="h-screen w-full">
           <Projects />
+        </div>
+      )}
+
+      {page == "dev-page" && (
+        <div className=' h-screen w-full'>
+          DEV PAGE
         </div>
       )}
     </>

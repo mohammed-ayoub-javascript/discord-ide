@@ -5,7 +5,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { useLanguage } from '@/context/languageContext'
+import { useLanguage } from '@/context/language-context'
 import { Check, ChevronDown } from 'lucide-react'
 import { dataLanguage } from './language-data'
 
