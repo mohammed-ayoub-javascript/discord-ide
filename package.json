@@ -37,6 +37,7 @@
     "monaco-editor": "^0.52.2",
     "node-cmd": "^5.0.0",
     "python-shell": "^5.0.0",
+    "react-treebeard": "^3.2.4",
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",
     "tailwind-merge": "^3.0.1",

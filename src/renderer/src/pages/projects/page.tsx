@@ -1,7 +1,6 @@
 import { ModeToggle } from '@/components/theme/mode-toggle'
 import { Button } from '@/components/ui/button'
 import { Code, Plus } from 'lucide-react'
-import { useLanguage } from '@/context/languageContext'
 import { useEffect, useState } from 'react'
 import { useTranslator } from '@/language/translator'
 import ChangeLanguage from '@/language/change-language'
