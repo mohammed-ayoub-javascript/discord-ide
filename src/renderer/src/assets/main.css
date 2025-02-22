@@ -59,7 +59,6 @@
 }
 
 
-/* From Uiverse.io by G4b413l */ 
 .jelly-triangle {
   --uib-size: 42px;
   --uib-speed: 1.25s;
@@ -144,3 +143,29 @@
    transform: none;
   }
  }
+
+ .treebeard {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.treebeard .toggle {
+  background: #333;
+  border-radius: 3px;
+}
+
+.treebeard .header:hover {
+  background: #2a2d2e;
+}
+
+.treebeard .header {
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.treebeard .header .name {
+  margin-left: 5px;
+}

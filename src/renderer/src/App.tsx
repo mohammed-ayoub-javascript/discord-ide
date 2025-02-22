@@ -3,6 +3,7 @@ import { ThemeProvider } from '@/components/theme/theme-provider'
 import { LanguageProvider } from './context/language-context'
 import { PageProvider, usePage } from './context/page-context'
 import { MainProjectSetupContextProvider } from './context/main-project-setup-context'
+import EditorMain from './pages/ide/page'
 
 function AppContent() {
   const { page } = usePage()
@@ -17,7 +18,7 @@ function AppContent() {
 
       {page == "dev-page" && (
         <div className=' h-screen w-full'>
-          DEV PAGE
+         <EditorMain />
         </div>
       )}
     </>

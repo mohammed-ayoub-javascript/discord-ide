@@ -1,5 +1,5 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron';
-import { join } from 'path';
+import path, { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import fs from 'fs-extra';
 import { spawn } from 'child_process';
@@ -75,7 +75,7 @@ async function initDb() {
 const expressApp = express();
 expressApp.use(express.json());
 expressApp.use(cors());
-expressApp.get('/projects', async (req, res) => {
+expressApp.get('/projects', async (_req, res) => {
   try {
     const projects = await Project.findAll({ include: { model: File, as: 'files' } });
     const projectsWithPackageData: any = [];
@@ -158,45 +158,68 @@ expressApp.delete('/projects/:id', async (req, res) => {
 expressApp.get('/projects/:id/files', async (req, res) => {
   try {
     const projectId = Number(req.params.id);
-    console.log(projectId);
-    
+    const targetPath = req.query.path?.toString();
+    const project : any = await Project.findByPk(projectId);
 
-    const project: any = await Project.findByPk(projectId);
-    console.log(project);
+    if (!project)  res.status(404).json({ error: 'Project not found' });
     
-    if (!project) {
-       res.status(404).json({ error: 'المشروع غير موجود' });
+    const basePath = project.getDataValue('path');
+    const fullPath = targetPath ? join(basePath, targetPath) : basePath;
+
+    if (!fs.existsSync(fullPath)) {
+       res.status(404).json({ error: 'Path not found' });
     }
-    const projectPath = project.dataValues.path;
-    const files = await readFilesRecursively(projectPath);
-    console.log(files);
-    
+
+    const files = await readDirectoryStructure(fullPath, basePath);
     res.json(files);
-    
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-async function readFilesRecursively(dir: string): Promise<any[]> {
-  let results: any[] = [];
-  const list = await fs.readdir(dir);
-  for (const file of list) {
-    const filePath = join(dir, file);
-    const stat = await fs.stat(filePath);
-    if (stat.isDirectory()) {
-      const nestedFiles = await readFilesRecursively(filePath);
-      results = results.concat(nestedFiles);
-    } else {
-      const content = await fs.readFile(filePath, 'utf8');
-      results.push({
-        path: filePath,
-        content,
-      });
-    }
+async function readDirectoryStructure(dir: string, basePath: string): Promise<any[]> {
+  try {
+    const stats = await fs.stat(dir);
+    if (!stats.isDirectory()) return [];
+
+    const children = await fs.readdir(dir);
+    return Promise.all(
+      children.map(async (child) => {
+        const fullPath = join(dir, child);
+        const relativePath = path.relative(basePath, fullPath);
+        const stat = await fs.stat(fullPath);
+        
+        return {
+          name: child,
+          path: relativePath,
+          isDirectory: stat.isDirectory(),
+        };
+      })
+    );
+  } catch (error) {
+    console.error('Error reading directory:', dir, error);
+    return [];
   }
-  return results;
 }
+// async function readFilesRecursively(dir: string): Promise<any[]> {
+//   let results: any[] = [];
+//   const list = await fs.readdir(dir);
+//   for (const file of list) {
+//     const filePath = join(dir, file);
+//     const stat = await fs.stat(filePath);
+//     if (stat.isDirectory()) {
+//       const nestedFiles = await readFilesRecursively(filePath);
+//       results = results.concat(nestedFiles);
+//     } else {
+//       const content = await fs.readFile(filePath, 'utf8');
+//       results.push({
+//         path: filePath,
+//         content,
+//       });
+//     }
+//   }
+//   return results;
+// }
 
 function startExpressServer() {
   const PORT = 3000;
