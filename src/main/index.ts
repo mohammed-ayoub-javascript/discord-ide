@@ -6,7 +6,7 @@ import { spawn } from 'child_process';
 import express from 'express';
 import { Sequelize, DataTypes, Model } from 'sequelize';
 import icon from '../../resources/icon.png?asset';
-
+import cors from "cors";
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: join('./database.sqlite'),
@@ -74,7 +74,7 @@ async function initDb() {
 
 const expressApp = express();
 expressApp.use(express.json());
-
+expressApp.use(cors());
 expressApp.get('/projects', async (req, res) => {
   try {
     const projects = await Project.findAll({ include: { model: File, as: 'files' } });
@@ -131,9 +131,9 @@ expressApp.post('/projects', async (req, res) => {
 
 expressApp.put('/projects/:id', async (req, res) => {
   try {
-    const project = await Project.findByPk(req.params.id);
+    const project : any = await Project.findByPk(req.params.id);
     if (!project) {
-      return res.status(404).json({ error: 'المشروع غير موجود' });
+       res.status(404).json({ error: 'المشروع غير موجود' });
     }
     await project.update(req.body);
     res.json(project);
@@ -144,9 +144,9 @@ expressApp.put('/projects/:id', async (req, res) => {
 
 expressApp.delete('/projects/:id', async (req, res) => {
   try {
-    const project = await Project.findByPk(req.params.id);
+    const project : any= await Project.findByPk(req.params.id);
     if (!project) {
-      return res.status(404).json({ error: 'المشروع غير موجود' });
+       res.status(404).json({ error: 'المشروع غير موجود' });
     }
     await project.destroy();
     res.json({ message: 'تم حذف المشروع' });
@@ -161,11 +161,11 @@ expressApp.get('/projects/:id/files', async (req, res) => {
     console.log(projectId);
     
 
-    const project = await Project.findByPk(projectId);
+    const project: any = await Project.findByPk(projectId);
     console.log(project);
     
     if (!project) {
-      return res.status(404).json({ error: 'المشروع غير موجود' });
+       res.status(404).json({ error: 'المشروع غير موجود' });
     }
     const projectPath = project.dataValues.path;
     const files = await readFilesRecursively(projectPath);

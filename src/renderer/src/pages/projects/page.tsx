@@ -1,6 +1,6 @@
 import { ModeToggle } from '@/components/theme/mode-toggle'
 import { Button } from '@/components/ui/button'
-import { Code, Plus } from 'lucide-react'
+import { Code, Link2, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslator } from '@/language/translator'
 import ChangeLanguage from '@/language/change-language'
@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { usePage } from '@/context/pageContext'
-
+import axios from "axios";
+import Loading from '@/loading/loading'
+import { API } from '@/lib/api'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 type FormErrors = {
   projectName?: string
   [key: `library-${number}`]: string
@@ -31,7 +34,10 @@ const Projects = () => {
   const [installProgress, setInstallProgress] = useState<string[]>([])
   const [isInstalling, setIsInstalling] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [installComplete, setInstallComplete] = useState(false)
+  const [installComplete, setInstallComplete] = useState(false);
+  const [projects , setProjects] = useState<any>([]);
+  const [isPorjectLoading , setIsPorjectLoading] = useState(false);
+  const [reload , setReload] = useState(0);
   const {changePage} = usePage();
   const t = useTranslator()
   const validateField = (name: string, value: string): string => {
@@ -121,12 +127,25 @@ const Projects = () => {
         path: projectPath
       })
       
-      window.electron.ipcRenderer.send('install-dependencies', projectPath)
+      window.electron.ipcRenderer.send('install-dependencies', projectPath);
+
+      setReload((reload) => reload + 1);
     }
   }
 
   const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + libraries.length) % libraries.length)
-  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % libraries.length)
+  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % libraries.length);
+
+  useEffect(() => {
+    axios.get(`${API}/projects`).then((res) => {
+      setProjects(res.data);
+      console.log(res.data);
+      setIsPorjectLoading(false);
+    }).catch((err) => {
+      setIsPorjectLoading(false);
+      console.log(err);
+    });
+  }  , [])
 
   return (
     <div className="w-full h-full">
@@ -260,6 +279,48 @@ const Projects = () => {
           <ChangeLanguage />
         </div>
       </div>
+      {isPorjectLoading == true && (
+      <div className=' w-full h-[80%] flex justify-center items-center flex-col'>
+        <Loading />
+      </div>        
+      )}
+
+      {isPorjectLoading == false && (
+        <div className=' w-full p-2  h-[90%]'>
+          {projects.length == 0 && (
+            <div className='w-full   h-[90%]  flex justify-center items-center flex-col'>
+             <h1 className=' text-4xl font-extrabold'>
+             You don't have projects yet!!
+             </h1>
+             <h1 className=' text-2xl font-bold'>
+             Click (+) to create your first project
+             </h1>
+            </div>
+          )}
+          {projects.map((item) => (
+            <div className=' w-full mt-3'>
+              <Card>
+                <CardHeader>
+                  <CardTitle className=' text-2xl font-extrabold'>
+                    {item.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className=' w-full flex justify-start items-center flex-row gap-5'>
+                    <Link2 />
+                    <code>
+                      {item.path}
+                    </code>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
+        </div>
+      )}
+
+      
+
     </div>
   )
 }
