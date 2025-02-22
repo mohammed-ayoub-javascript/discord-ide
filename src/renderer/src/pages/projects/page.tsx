@@ -17,7 +17,9 @@ import { usePage } from '@/context/pageContext'
 import axios from "axios";
 import Loading from '@/loading/loading'
 import { API } from '@/lib/api'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from "@/components/ui/scroll-area"
+
 type FormErrors = {
   projectName?: string
   [key: `library-${number}`]: string
@@ -297,8 +299,9 @@ const Projects = () => {
              </h1>
             </div>
           )}
+          <ScrollArea className=' h-screen w-full'>
           {projects.map((item) => (
-            <div className=' w-full mt-3'>
+            <div className=' w-full mt-3 cursor-pointer'>
               <Card>
                 <CardHeader>
                   <CardTitle className=' text-2xl font-extrabold'>
@@ -315,7 +318,9 @@ const Projects = () => {
                 </CardContent>
               </Card>
             </div>
-          ))}
+          ))}            
+          </ScrollArea>
+
         </div>
       )}
 
