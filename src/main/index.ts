@@ -243,7 +243,40 @@ app.whenReady().then(async () => {
 
   await initDb();
   startExpressServer();
-
+  ipcMain.handle('read-file', async (_, path) => {
+    try {
+      return await fs.readFile(path, 'utf8')
+    } catch (error) {
+      throw new Error(`فشل قراءة الملف: ${path}`)
+    }
+  })
+  
+  ipcMain.handle('write-file', async (_, path, content) => {
+    try {
+      await fs.writeFile(path, content)
+      return true
+    } catch (error) {
+      throw new Error(`فشل حفظ الملف: ${path}`)
+    }
+  })
+  
+  ipcMain.handle('create-file', async (_, path) => {
+    try {
+      await fs.ensureFile(path)
+      return true
+    } catch (error) {
+      throw new Error(`فشل إنشاء الملف: ${path}`)
+    }
+  })
+  
+  ipcMain.handle('delete-file', async (_, path) => {
+    try {
+      await fs.remove(path)
+      return true
+    } catch (error) {
+      throw new Error(`فشل حذف الملف: ${path}`)
+    }
+  })
   ipcMain.handle('open-directory-dialog', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory'],

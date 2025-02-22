@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld('electron', {
     },
     removeAllListeners: (channel: string) => {
       ipcRenderer.removeAllListeners(channel)
-    }
+    },
+    readFile: (path: string) => ipcRenderer.invoke('read-file', path),
+    writeFile: (path: string, content: string) => ipcRenderer.invoke('write-file', path, content),
+    createFile: (path: string) => ipcRenderer.invoke('create-file', path),
+    deleteFile: (path: string) => ipcRenderer.invoke('delete-file', path),
   }
 })

@@ -2,6 +2,7 @@ import Projects from './pages/projects/page'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { LanguageProvider } from './context/language-context'
 import { PageProvider, usePage } from './context/page-context'
+import { MainProjectSetupContextProvider } from './context/main-project-setup-context'
 
 function AppContent() {
   const { page } = usePage()
@@ -25,13 +26,15 @@ function AppContent() {
 
 function App() {
   return (
-    <PageProvider>
-      <LanguageProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-          <AppContent />
-        </ThemeProvider>
-      </LanguageProvider>
-    </PageProvider>
+    <MainProjectSetupContextProvider>
+      <PageProvider>
+        <LanguageProvider>
+          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <AppContent />
+          </ThemeProvider>
+        </LanguageProvider>
+      </PageProvider>      
+    </MainProjectSetupContextProvider>
   )
 }
 
