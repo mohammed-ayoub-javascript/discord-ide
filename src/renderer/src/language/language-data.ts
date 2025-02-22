@@ -18,8 +18,8 @@ export const dataLanguage = {
     },
     validation: {
       required: 'هذا الحقل مطلوب',
-      invalidName: 'يجب أن يكون الاسم باللغة الإنجليزية بدون مسافات',
-    },
+      invalidName: 'يجب أن يكون الاسم باللغة الإنجليزية بدون مسافات'
+    }
   },
   en: {
     dir: 'ltr',
@@ -40,7 +40,7 @@ export const dataLanguage = {
     },
     validation: {
       required: 'This field is required',
-      invalidName: 'Name must be lowercase with hyphens only',
-    },
+      invalidName: 'Name must be lowercase with hyphens only'
+    }
   }
 }

@@ -16,9 +16,9 @@ function AppContent() {
         </div>
       )}
 
-      {page == "dev-page" && (
-        <div className=' h-screen w-full'>
-         <EditorMain />
+      {page == 'dev-page' && (
+        <div className=" h-screen w-full">
+          <EditorMain />
         </div>
       )}
     </>
@@ -34,7 +34,7 @@ function App() {
             <AppContent />
           </ThemeProvider>
         </LanguageProvider>
-      </PageProvider>      
+      </PageProvider>
     </MainProjectSetupContextProvider>
   )
 }

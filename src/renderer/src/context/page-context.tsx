@@ -14,11 +14,7 @@ export function PageProvider({ children }: { children: ReactNode }) {
     setPage(newPage)
   }
 
-  return (
-    <PageContext.Provider value={{ page, changePage }}>
-      {children}
-    </PageContext.Provider>
-  )
+  return <PageContext.Provider value={{ page, changePage }}>{children}</PageContext.Provider>
 }
 
 export const usePage = () => {

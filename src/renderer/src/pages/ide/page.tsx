@@ -1,43 +1,57 @@
-import { useState, useEffect } from 'react';
-import { Treebeard } from 'react-treebeard';
-import { useMainProjectSetupContext } from '@/context/main-project-setup-context';
-import { Editor } from '@monaco-editor/react';
+import { useState, useEffect } from 'react'
+import { Treebeard } from 'react-treebeard'
+import { useMainProjectSetupContext } from '@/context/main-project-setup-context'
+import { Editor } from '@monaco-editor/react'
 
 type FileNode = {
-  name: string;
-  path: string;
-  children?: FileNode[];
-  toggled?: boolean;
-  isDirectory?: boolean;
-};
+  name: string
+  path: string
+  children?: FileNode[]
+  toggled?: boolean
+  isDirectory?: boolean
+}
 
 const FileExplorer = ({ onSelectFile }: { onSelectFile: (path: string) => void }) => {
-  const { path: projectPath } = useMainProjectSetupContext();
-  const [data, setData] = useState<FileNode>({ 
-    name: '📁 Project', 
-    path: '', 
-    children: [], 
-    isDirectory: true 
-  });
-  const [showNodeModules, setShowNodeModules] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { path: projectPath } = useMainProjectSetupContext()
+  const [data, setData] = useState<FileNode>({
+    name: '📁 Project',
+    path: '',
+    children: [],
+    isDirectory: true
+  })
+  const [showNodeModules, setShowNodeModules] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const matchEmoji = (fileName: string): string => {
-    const ext = fileName.split('.').pop()?.toLowerCase();
+    const ext = fileName.split('.').pop()?.toLowerCase()
     const emojiMap: { [key: string]: string } = {
-      js: '📜', ts: '📘', json: '📁', md: '📖',
-      html: '🌐', css: '🎨', scss: '🎨', svg: '🖼️',
-      png: '🖼️', jpg: '🖼️', ico: '🖼️', gitignore: '🙈',
-      env: '🔧', lock: '🔒', map: '🗺️', sample: '📋',
-    };
-    return emojiMap[ext || ''] || (fileName.includes('.') ? '📄' : '📂');
-  };
+      js: '📜',
+      ts: '📘',
+      json: '📁',
+      md: '📖',
+      html: '🌐',
+      css: '🎨',
+      scss: '🎨',
+      svg: '🖼️',
+      png: '🖼️',
+      jpg: '🖼️',
+      ico: '🖼️',
+      gitignore: '🙈',
+      env: '🔧',
+      lock: '🔒',
+      map: '🗺️',
+      sample: '📋'
+    }
+    return emojiMap[ext || ''] || (fileName.includes('.') ? '📄' : '📂')
+  }
 
   const fetchFiles = async (path: string): Promise<FileNode[]> => {
     try {
-      const response = await fetch(`http://localhost:3000/projects/1/files?path=${encodeURIComponent(path)}`);
-      const items = await response.json();
-      
+      const response = await fetch(
+        `http://localhost:3000/projects/1/files?path=${encodeURIComponent(path)}`
+      )
+      const items = await response.json()
+
       return items
         .filter((item: any) => showNodeModules || !item.path.includes('node_modules'))
         .map((item: any) => ({
@@ -45,47 +59,47 @@ const FileExplorer = ({ onSelectFile }: { onSelectFile: (path: string) => void }
           path: item.path,
           isDirectory: item.isDirectory,
           children: item.isDirectory ? [] : undefined,
-          toggled: false,
-        }));
+          toggled: false
+        }))
     } catch (error) {
-      console.error('Failed to fetch files:', error);
-      return [];
+      console.error('Failed to fetch files:', error)
+      return []
     }
-  };
+  }
 
   useEffect(() => {
     const initialize = async () => {
-      if (!projectPath) return;
-      setLoading(true);
+      if (!projectPath) return
+      setLoading(true)
       try {
-        const initialChildren = await fetchFiles('');
-        setData({ ...data, path: projectPath, children: initialChildren });
+        const initialChildren = await fetchFiles('')
+        setData({ ...data, path: projectPath, children: initialChildren })
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
-    initialize();
-  }, [projectPath, showNodeModules]);
+    }
+    initialize()
+  }, [projectPath, showNodeModules])
 
   const onToggle = async (node: FileNode, toggled: boolean) => {
     if (!node.isDirectory) {
-      onSelectFile(join(projectPath, node.path));
-      return;
+      onSelectFile(join(projectPath, node.path))
+      return
     }
 
     if (toggled && node.children?.length === 0) {
-      setLoading(true);
+      setLoading(true)
       try {
-        const children = await fetchFiles(node.path);
-        node.children = children;
+        const children = await fetchFiles(node.path)
+        node.children = children
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     }
 
-    node.toggled = toggled;
-    setData({ ...data });
-  };
+    node.toggled = toggled
+    setData({ ...data })
+  }
 
   return (
     <div className="relative h-full bg-gray-900 text-gray-100">
@@ -111,7 +125,7 @@ const FileExplorer = ({ onSelectFile }: { onSelectFile: (path: string) => void }
               base: { backgroundColor: '#1a1a1a', padding: '0.5rem' },
               node: {
                 header: {
-                  base: { 
+                  base: {
                     padding: '8px',
                     '&:hover': { backgroundColor: '#2d2d2d' }
                   },
@@ -124,36 +138,36 @@ const FileExplorer = ({ onSelectFile }: { onSelectFile: (path: string) => void }
         />
       )}
     </div>
-  );
-};
+  )
+}
 
 const CodeEditor = ({ filePath }: { filePath: string | null }) => {
-  const [content, setContent] = useState('');
-  const [isDirty, setIsDirty] = useState(false);
+  const [content, setContent] = useState('')
+  const [isDirty, setIsDirty] = useState(false)
 
   useEffect(() => {
     const loadFile = async () => {
-      if (!filePath) return;
+      if (!filePath) return
       try {
-        const content = await window.electronAPI.readFile(filePath);
-        setContent(content);
-        setIsDirty(false);
+        const content = await window.electronAPI.readFile(filePath)
+        setContent(content)
+        setIsDirty(false)
       } catch (error) {
-        console.error('فشل تحميل الملف:', error);
+        console.error('فشل تحميل الملف:', error)
       }
-    };
-    loadFile();
-  }, [filePath]);
+    }
+    loadFile()
+  }, [filePath])
 
   const handleSave = async (value?: string) => {
-    if (!filePath || !value) return;
+    if (!filePath || !value) return
     try {
-      await window.electronAPI.writeFile(filePath, value);
-      setIsDirty(false);
+      await window.electronAPI.writeFile(filePath, value)
+      setIsDirty(false)
     } catch (error) {
-      console.error('خطأ في الحفظ:', error);
+      console.error('خطأ في الحفظ:', error)
     }
-  };
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -161,35 +175,35 @@ const CodeEditor = ({ filePath }: { filePath: string | null }) => {
         {filePath || 'لم يتم اختيار ملف'}
         {isDirty && <span className="ml-2 text-yellow-500">● غير محفوظ</span>}
       </div>
-      
+
       <Editor
         height="100%"
         defaultLanguage="typescript"
         theme="vs-dark"
         value={content}
         onChange={(value) => {
-          setContent(value || '');
-          setIsDirty(true);
+          setContent(value || '')
+          setIsDirty(true)
         }}
         options={{
           minimap: { enabled: true },
           fontSize: 14,
-          automaticLayout: true,
+          automaticLayout: true
         }}
       />
     </div>
-  );
-};
+  )
+}
 
 const EditorMain = () => {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
 
   return (
     <div className="flex h-screen bg-gray-900">
       <div className="w-72 border-r border-gray-700 flex flex-col">
         <FileExplorer onSelectFile={setSelectedFile} />
       </div>
-      
+
       <div className="flex-1 flex flex-col">
         {selectedFile ? (
           <CodeEditor filePath={selectedFile} />
@@ -200,7 +214,7 @@ const EditorMain = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EditorMain;
+export default EditorMain

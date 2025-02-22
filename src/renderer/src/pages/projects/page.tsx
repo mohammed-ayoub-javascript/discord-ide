@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { usePage } from '@/context/page-context'
-import axios from "axios";
+import axios from 'axios'
 import Loading from '@/loading/loading'
 import { API } from '@/lib/api'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 type FormErrors = {
   projectName?: string
@@ -36,15 +36,16 @@ const Projects = () => {
   const [installProgress, setInstallProgress] = useState<string[]>([])
   const [isInstalling, setIsInstalling] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [installComplete, setInstallComplete] = useState(false);
-  const [projects , setProjects] = useState<any>([]);
-  const [isPorjectLoading , setIsPorjectLoading] = useState(false);
-  const [reload , setReload] = useState(0);
-  const {changePage} = usePage();
+  const [installComplete, setInstallComplete] = useState(false)
+  const [projects, setProjects] = useState<any>([])
+  const [isPorjectLoading, setIsPorjectLoading] = useState(false)
+  const [reload, setReload] = useState(0)
+  const { changePage } = usePage()
   const t = useTranslator()
   const validateField = (name: string, value: string): string => {
     if (!value.trim()) return t('validation.required') as any
-    if (name === 'projectName' && !/^[a-z0-9-_]+$/.test(value)) return t('validation.invalidName') as any
+    if (name === 'projectName' && !/^[a-z0-9-_]+$/.test(value))
+      return t('validation.invalidName') as any
     return ''
   }
 
@@ -65,7 +66,10 @@ const Projects = () => {
       setNewLibraryName('')
     } else {
       setLibraries([...libraries, ''])
-      setErrors(prev => ({ ...prev, [`library-${libraries.length}`]: t('validation.required') as any }))
+      setErrors((prev) => ({
+        ...prev,
+        [`library-${libraries.length}`]: t('validation.required') as any
+      }))
     }
   }
 
@@ -82,14 +86,16 @@ const Projects = () => {
 
   useEffect(() => {
     if (libraries.length >= 15 && searchTerm.trim()) {
-      const index = libraries.findIndex(lib => lib.toLowerCase().includes(searchTerm.toLowerCase()))
+      const index = libraries.findIndex((lib) =>
+        lib.toLowerCase().includes(searchTerm.toLowerCase())
+      )
       if (index !== -1) setCurrentIndex(index)
     }
   }, [searchTerm, libraries])
 
   useEffect(() => {
     const progressHandler = (_event: any, data: string) => {
-      setInstallProgress(prev => [...prev, data])
+      setInstallProgress((prev) => [...prev, data])
     }
 
     const completeHandler = (success: boolean) => {
@@ -108,49 +114,52 @@ const Projects = () => {
 
   const handleCreateProject = async () => {
     if (!validateForm()) {
-      console.log('error');
-      
+      console.log('error')
     }
-    
+
     const result = await window.electron.ipcRenderer.invoke('open-directory-dialog')
-    
+
     if (!result.canceled && result.filePaths[0]) {
       const projectPath = result.filePaths[0]
       setIsInstalling(true)
       setInstallComplete(false)
-      
+
       window.electron.ipcRenderer.send('create-project', {
         projectData: {
           name: projectName,
           description,
           token,
-          libraries: libraries.filter(l => l.trim())
+          libraries: libraries.filter((l) => l.trim())
         },
         path: projectPath
       })
-      
-      window.electron.ipcRenderer.send('install-dependencies', projectPath);
 
-      setReload((reload) => reload + 1);
+      window.electron.ipcRenderer.send('install-dependencies', projectPath)
+
+      setReload((reload) => reload + 1)
     }
   }
 
-  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + libraries.length) % libraries.length)
-  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % libraries.length);
+  const handlePrev = () =>
+    setCurrentIndex((prev) => (prev - 1 + libraries.length) % libraries.length)
+  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % libraries.length)
 
   useEffect(() => {
-    axios.get(`${API}/projects`).then((res) => {
-      setProjects(res.data);
-      console.log(res.data);
-      setIsPorjectLoading(false);
-    }).catch((err) => {
-      setIsPorjectLoading(false);
-      console.log(err);
-    });
-  }  , [])
+    axios
+      .get(`${API}/projects`)
+      .then((res) => {
+        setProjects(res.data)
+        console.log(res.data)
+        setIsPorjectLoading(false)
+      })
+      .catch((err) => {
+        setIsPorjectLoading(false)
+        console.log(err)
+      })
+  }, [])
 
   const goToProject = () => {
-    changePage("dev-page")
+    changePage('dev-page')
   }
 
   return (
@@ -159,36 +168,42 @@ const Projects = () => {
         <div className="text-2xl font-extrabold cursor-pointer">{t('home.title') as any}</div>
         <div className="flex items-center gap-2">
           <Dialog>
-            <DialogTrigger><Button><Plus /></Button></DialogTrigger>
+            <DialogTrigger>
+              <Button>
+                <Plus />
+              </Button>
+            </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t('home.dialog.title') as any}</DialogTitle>
                 <DialogDescription className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">{t('home.dialog.form.projectname') as any}</label>
+                    <label className="block text-sm font-medium mb-1">
+                      {t('home.dialog.form.projectname') as any}
+                    </label>
                     <Input
                       value={projectName}
                       onChange={(e) => setProjectName(e.target.value)}
                       className={errors.projectName ? 'border-red-500' : ''}
                       placeholder="my-project"
                     />
-                    {errors.projectName && <p className="text-red-500 text-xs mt-1">{errors.projectName}</p>}
+                    {errors.projectName && (
+                      <p className="text-red-500 text-xs mt-1">{errors.projectName}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">{t('home.dialog.form.description') as any}</label>
-                    <Input
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                    />
+                    <label className="block text-sm font-medium mb-1">
+                      {t('home.dialog.form.description') as any}
+                    </label>
+                    <Input value={description} onChange={(e) => setDescription(e.target.value)} />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-1">{t('home.dialog.form.token') as any}</label>
-                    <Input
-                      value={token}
-                      onChange={(e) => setToken(e.target.value)}
-                    />
+                    <label className="block text-sm font-medium mb-1">
+                      {t('home.dialog.form.token') as any}
+                    </label>
+                    <Input value={token} onChange={(e) => setToken(e.target.value)} />
                   </div>
 
                   {libraries.length >= 15 ? (
@@ -207,17 +222,17 @@ const Projects = () => {
                         />
                         <Button onClick={handleNext}>{'>'}</Button>
                       </div>
-                      {errors[`library-${currentIndex}`] && <p className="text-red-500 text-xs mt-1">{errors[`library-${currentIndex}`]}</p>}
+                      {errors[`library-${currentIndex}`] && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {errors[`library-${currentIndex}`]}
+                        </p>
+                      )}
                       <Input
                         placeholder={t('home.dialog.form.libraryName') as any}
                         value={newLibraryName}
                         onChange={(e) => setNewLibraryName(e.target.value)}
                       />
-                      <Button
-                        onClick={addLibraryField}
-                        variant="outline"
-                        className="w-full"
-                      >
+                      <Button onClick={addLibraryField} variant="outline" className="w-full">
                         <Plus className="h-4 w-4 mr-2" />
                         {t('home.dialog.form.addLibrary') as any}
                       </Button>
@@ -233,38 +248,42 @@ const Projects = () => {
                             placeholder={`Library ${index + 1}`}
                           />
                           {index === libraries.length - 1 && (
-                            <Button
-                              onClick={addLibraryField}
-                              variant="outline"
-                              size="icon"
-                            >
+                            <Button onClick={addLibraryField} variant="outline" size="icon">
                               <Plus className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
                       ))}
-                      {Object.keys(errors).map((key) => key.startsWith('library-') && (
-                        <p key={key} className="text-red-500 text-xs mt-1 ml-2">
-                          {errors[key]}
-                        </p>
-                      ))}
+                      {Object.keys(errors).map(
+                        (key) =>
+                          key.startsWith('library-') && (
+                            <p key={key} className="text-red-500 text-xs mt-1 ml-2">
+                              {errors[key]}
+                            </p>
+                          )
+                      )}
                     </div>
                   )}
 
-                  <Button 
+                  <Button
                     onClick={handleCreateProject}
                     className="w-full mt-4"
                     disabled={isInstalling}
                   >
-                    {isInstalling ? t('home.dialog.form.installing') as any : t('home.dialog.form.button') as any}
+                    {isInstalling
+                      ? (t('home.dialog.form.installing') as any)
+                      : (t('home.dialog.form.button') as any)}
                   </Button>
 
                   {installComplete && (
-                      <Button className=' w-full' onClick={() => {
-                        changePage("dev-page");
-                      }}>
-                        <Code />
-                      </Button>
+                    <Button
+                      className=" w-full"
+                      onClick={() => {
+                        changePage('dev-page')
+                      }}
+                    >
+                      <Code />
+                    </Button>
                   )}
 
                   {isInstalling && (
@@ -286,52 +305,43 @@ const Projects = () => {
         </div>
       </div>
       {isPorjectLoading == true && (
-      <div className=' w-full h-[80%] flex justify-center items-center flex-col'>
-        <Loading />
-      </div>        
-      )}
-
-      {isPorjectLoading == false && (
-        <div className=' w-full p-2  h-[90%]'>
-          {projects.length == 0 && (
-            <div className='w-full   h-[90%]  flex justify-center items-center flex-col'>
-             <h1 className=' text-4xl font-extrabold'>
-             You don't have projects yet!!
-             </h1>
-             <h1 className=' text-2xl font-bold'>
-             Click (+) to create your first project
-             </h1>
-            </div>
-          )}
-          <ScrollArea className=' h-screen w-full'>
-          {projects.map((item) => (
-            <div className=' w-full mt-3 cursor-pointer' onClick={() => {
-              goToProject();
-            }}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className=' text-2xl font-extrabold'>
-                    {item.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className=' w-full flex justify-start items-center flex-row gap-5'>
-                    <Link2 />
-                    <code>
-                      {item.path}
-                    </code>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ))}            
-          </ScrollArea>
-
+        <div className=" w-full h-[80%] flex justify-center items-center flex-col">
+          <Loading />
         </div>
       )}
 
-      
-
+      {isPorjectLoading == false && (
+        <div className=" w-full p-2  h-[90%]">
+          {projects.length == 0 && (
+            <div className="w-full   h-[90%]  flex justify-center items-center flex-col">
+              <h1 className=" text-4xl font-extrabold">You don't have projects yet!!</h1>
+              <h1 className=" text-2xl font-bold">Click (+) to create your first project</h1>
+            </div>
+          )}
+          <ScrollArea className=" h-screen w-full">
+            {projects.map((item) => (
+              <div
+                className=" w-full mt-3 cursor-pointer"
+                onClick={() => {
+                  goToProject()
+                }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className=" text-2xl font-extrabold">{item.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className=" w-full flex justify-start items-center flex-row gap-5">
+                      <Link2 />
+                      <code>{item.path}</code>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+          </ScrollArea>
+        </div>
+      )}
     </div>
   )
 }
